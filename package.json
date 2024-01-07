@@ -1,0 +1,25 @@
+{
+  "name": "foodfire-server",
+  "version": "1.0.0",
+  "description": "A Node.js web server that fetches data from a third-party (Swiggy) API and exposes it to a client (FoodFire) app.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "build": "parcel build server.js --target node --out-dir dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chetannada/FoodFire-Server.git"
+  },
+  "author": "Chetan Nada",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chetannada/FoodFire-Server/issues"
+  },
+  "homepage": "https://github.com/chetannada/FoodFire-Server#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "cross-fetch": "^4.0.0",
+    "express": "^4.18.2"
+  }
+}
