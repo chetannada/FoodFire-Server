@@ -1,12 +1,19 @@
 const express = require("express");
+const dotenvFlow = require("dotenv-flow");
 const cors = require("cors");
-require("dotenv").config();
+const { connectToMongoDB } = require("./database/connection");
+
+// dotenv-flow is used to manage environment variables across different environments
+dotenvFlow.config();
 
 const app = express();
 
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
+
+// Connect to MongoDB
+connectToMongoDB();
 
 const router = require("./routers/router");
 
