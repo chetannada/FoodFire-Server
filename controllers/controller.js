@@ -1,4 +1,6 @@
 const fetch = require("cross-fetch");
+const restaurant = require("../models/restaurant");
+const menu = require("../models/menu");
 
 const SWIGGY_RESTAURANT_API = process.env.SWIGGY_RESTAURANT_API;
 
@@ -11,67 +13,91 @@ const initialData = (req, res) => {
 };
 
 const restaurantsData = async (req, res) => {
-  const { lat, lng, page_type } = req.query;
-
-  const url = `${SWIGGY_RESTAURANT_API}?lat=${lat}&lng=${lng}&page_type=${page_type}`;
-
-  await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
-    },
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Internal Server Error");
-      }
-
-      return response.json();
-    })
-    .then((data) => {
-      res.json(data);
-    })
-    .catch((error) => {
-      console.log("There was an " + error);
-      res.status(500).send(error);
-    });
+  try {
+    const data = await restaurant.find({});
+    res.json(data?.[0]);
+  } catch (error) {
+    console.error("Failed to fetch restaurant data:", error);
+    res.status(500).send("Failed to fetch restaurant data");
+  }
 };
+
+// const restaurantsData = async (req, res) => {
+//   const { lat, lng, page_type } = req.query;
+
+//   const url = `${SWIGGY_RESTAURANT_API}?lat=${lat}&lng=${lng}&page_type=${page_type}`;
+
+//   await fetch(url, {
+//     headers: {
+//       "Content-Type": "application/json",
+//       "Access-Control-Allow-Origin": "*",
+//       "User-Agent":
+//         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
+//     },
+//   })
+//     .then((response) => {
+//       if (!response.ok) {
+//         throw new Error("Internal Server Error");
+//       }
+
+//       return response.json();
+//     })
+//     .then((data) => {
+//       res.json(data);
+//     })
+//     .catch((error) => {
+//       console.log("There was an " + error);
+//       res.status(500).send(error);
+//     });
+// };
 
 const menuData = async (req, res) => {
-  const {
-    "page-type": page_type,
-    "complete-menu": complete_menu,
-    lat,
-    lng,
-    submitAction,
-    restaurantId,
-  } = req.query;
+  const { restaurantId } = req.query;
 
-  const url = `${SWIGGY_MENU_API}?page-type=${page_type}&complete-menu=${complete_menu}&lat=${lat}&lng=${lng}&submitAction=${submitAction}&restaurantId=${restaurantId}`;
+  try {
+    const menuId = await menu.findOne({ restaurantId });
+    if (!menuId) return res.status(404).json({ error: "Menu not found" });
 
-  await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
-    },
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Internal Server Error");
-      }
-      return response.json();
-    })
-    .then((data) => {
-      res.json(data);
-    })
-    .catch((error) => {
-      console.log("There was an " + error);
-      res.status(500).send(error);
-    });
+    res.json(menuId.data); // return only the nested menu data
+  } catch (err) {
+    console.error("MongoDB menu fetch error:", err);
+    res.status(500).send("Failed to fetch menu");
+  }
 };
+
+// const menuData = async (req, res) => {
+//   const {
+//     "page-type": page_type,
+//     "complete-menu": complete_menu,
+//     lat,
+//     lng,
+//     submitAction,
+//     restaurantId,
+//   } = req.query;
+
+//   const url = `${SWIGGY_MENU_API}?page-type=${page_type}&complete-menu=${complete_menu}&lat=${lat}&lng=${lng}&submitAction=${submitAction}&restaurantId=${restaurantId}`;
+
+//   await fetch(url, {
+//     headers: {
+//       "Content-Type": "application/json",
+//       "Access-Control-Allow-Origin": "*",
+//       "User-Agent":
+//         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
+//     },
+//   })
+//     .then((response) => {
+//       if (!response.ok) {
+//         throw new Error("Internal Server Error");
+//       }
+//       return response.json();
+//     })
+//     .then((data) => {
+//       res.json(data);
+//     })
+//     .catch((error) => {
+//       console.log("There was an " + error);
+//       res.status(500).send(error);
+//     });
+// };
 
 module.exports = { initialData, restaurantsData, menuData };
